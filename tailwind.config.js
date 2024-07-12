@@ -4,7 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#1F1E1E",
+        background: "#131515",
+        sunny: "#498FE0",
+        cloudy: "#5A6F79",
+        rainy: "#56565C",
+        snowy: "#FFFAFB",
       },
     },
   },
