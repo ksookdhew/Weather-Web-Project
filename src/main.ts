@@ -1,5 +1,3 @@
-import { fetchAllCitiesWeather, fetchForecast } from "./api.ts";
+import { displayWeather } from "./dom-manipulation.ts";
 
-fetchAllCitiesWeather();
-
-fetchForecast();
+displayWeather();
