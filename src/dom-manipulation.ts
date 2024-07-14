@@ -24,7 +24,7 @@ export async function displayWeather() {
 
     cityDiv.className = `flex bg-${
       WEATHER_CODES[weatherData.current.weather_code]
-    } w-10/12 justify-between rounded-md p-5 `;
+    } w-10/12 justify-between rounded-md p-5 items-center`;
 
     const cityTitle = document.createElement("h3");
     cityTitle.className = "w-fit";
@@ -32,7 +32,7 @@ export async function displayWeather() {
     cityDiv.append(cityTitle);
 
     const weatherDiv = document.createElement("div");
-    weatherDiv.className = "flex w-fit gap-4";
+    weatherDiv.className = "flex w-fit gap-4 items-center";
 
     const weatherIcon = document.createElement("div");
     weatherIcon.innerHTML = `  <svg
@@ -40,8 +40,8 @@ export async function displayWeather() {
       fill="currentColor"
       stroke-width="0"
       viewBox="0 0 24 24"
-      height="20px"
-      width="20px"
+      height="40px"
+      width="40px"
       xmlns="http://www.w3.org/2000/svg"
     >
         ${WEATHER_ICONS[weatherData.current.weather_code]}
@@ -126,16 +126,18 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
     const weatherIconDiv = document.createElement("div");
     weatherIconDiv.className = "place-self-center";
+    console.log(WEATHER_ICONS[weatherDetail.daily.weather_code[i]]);
     weatherIconDiv.innerHTML = `
         <svg
           stroke="currentColor"
           fill="currentColor"
           stroke-width="0"
           viewBox="0 0 24 24"
-          height="20px"
-          width="20px"
+          height="40px"
+          width="40px"
           xmlns="http://www.w3.org/2000/svg"
         >
+          
            ${WEATHER_ICONS[weatherDetail.daily.weather_code[i]]}
         </svg>`;
     dayDiv.append(weatherIconDiv);
