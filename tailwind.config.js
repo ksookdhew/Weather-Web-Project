@@ -8,7 +8,7 @@ export default {
         sunny: "#498FE0",
         cloudy: "#90a5af",
         rainy: "#56565C",
-        snowy: "#FFFAFB",
+        snowy: "##ccc9bb",
         thunderstorm: "56565C",
       },
     },
