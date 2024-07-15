@@ -1,10 +1,11 @@
+import L from "leaflet";
 import { fetchCity7DayForecast, fetchCityWeather } from "./api.ts";
 import { WEATHER_CODES, WEATHER_ICONS, WEATHER_IMAGES } from "./constants.ts";
 import { City, WeatherResponse } from "./interfaces.ts";
 import { cities } from "./utilities.ts";
 
 export async function displayWeather() {
-  const detailsDiv = document.querySelector<HTMLDivElement>("#app > #detail");
+  const detailsDiv = document.querySelector<HTMLDivElement>("#app > div");
   detailsDiv?.remove();
 
   const appDiv = document.querySelector<HTMLDivElement>("#app");
@@ -16,6 +17,30 @@ export async function displayWeather() {
   pageTitle.className = "text-white text-4xl p-8 self-start";
   pageTitle.innerText = "Weather";
   homeDiv?.append(pageTitle);
+
+  const headerDiv = document.createElement("div");
+  headerDiv.className = "flex justify-end w-10/12";
+
+  const mapButton = document.createElement("div");
+  mapButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+  mapButton.innerHTML = `
+      <svg
+        stroke="currentColor"
+        fill="currentColor"
+        stroke-width="0"
+        viewBox="0 0 576 512"
+        height="20px"
+        width="20px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M0 117.66v346.32c0 11.32 11.43 19.06 21.94 14.86L160 416V32L20.12 87.95A32.006 32.006 0 0 0 0 117.66zM192 416l192 64V96L192 32v384zM554.06 33.16L416 96v384l139.88-55.95A31.996 31.996 0 0 0 576 394.34V48.02c0-11.32-11.43-19.06-21.94-14.86z"></path>
+      </svg>`;
+  mapButton.addEventListener("click", () => {
+    map();
+  });
+  headerDiv.append(mapButton);
+
+  homeDiv?.append(headerDiv);
 
   for (const city of cities) {
     const cityDiv = document.createElement("div");
@@ -64,7 +89,7 @@ export async function displayWeather() {
 }
 
 export async function displayWeatherDetail(city: City, today: WeatherResponse) {
-  const homeDiv = document.querySelector<HTMLDivElement>("#app > #home");
+  const homeDiv = document.querySelector<HTMLDivElement>("#app div");
   homeDiv?.remove();
 
   const appDiv = document.querySelector<HTMLDivElement>("#app");
@@ -180,4 +205,66 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
   detailDiv.append(backButtonDiv);
 
   appDiv?.append(detailDiv);
+}
+
+export function map() {
+  const appDiv = document.querySelector<HTMLDivElement>("#app");
+  const homeDiv = document.querySelector<HTMLDivElement>("#app > #home");
+  homeDiv?.remove();
+
+  const outerMapDiv = document.createElement("div");
+
+  const pageTitle = document.createElement("h1");
+  pageTitle.className = "text-white text-4xl p-8";
+  pageTitle.innerText = "Map";
+  outerMapDiv?.append(pageTitle);
+
+  const mapDiv = document.createElement("div");
+  mapDiv.id = "mapid";
+  mapDiv.style.height = "600px";
+  outerMapDiv?.appendChild(mapDiv);
+  const backButtonDiv = document.createElement("div");
+  backButtonDiv.className = "flex justify-end w-10/12";
+
+  const backButton = document.createElement("div");
+  backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+  backButton.innerHTML = `
+      <svg
+        stroke="currentColor"
+        fill="currentColor"
+        stroke-width="0"
+        viewBox="0 0 576 512"
+        height="20px"
+        width="20px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>
+      </svg>`;
+  backButton.addEventListener("click", () => {
+    displayWeather();
+  });
+  backButtonDiv.append(backButton);
+
+  outerMapDiv?.append(backButtonDiv);
+
+  appDiv?.append(outerMapDiv);
+
+  const map = L.map("mapid").setView([-26.2, 28.03], 13);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+  }).addTo(map);
+
+  map.on("click", async (e) => {
+    const { lat, lng } = e.latlng;
+    const city: City = {
+      name: `${lat}°, ${lng}°`,
+      latitude: lat,
+      longitude: lng,
+    };
+    if (city) {
+      const weatherData = await fetchCityWeather(city);
+      displayWeatherDetail(city, weatherData);
+    }
+  });
 }
