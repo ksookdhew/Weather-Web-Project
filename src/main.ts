@@ -1,3 +1,3 @@
-import { displayWeather } from "./dom-manipulation.ts";
-
+import { displaySkeleton, displayWeather } from "./dom-manipulation.ts";
+displaySkeleton();
 displayWeather();
