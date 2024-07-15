@@ -2,7 +2,12 @@ import L from "leaflet";
 import { fetchCity7DayForecast, fetchCityWeather } from "./api.ts";
 import { WEATHER_CODES, WEATHER_ICONS, WEATHER_IMAGES } from "./constants.ts";
 import { City, WeatherResponse } from "./interfaces.ts";
-import { cities } from "./utilities.ts";
+import {
+  cities,
+  createLocationDiv,
+  getSvgOtherIcon,
+  getSvgWeatherIcon,
+} from "./utilities.ts";
 
 export async function displayWeather() {
   const detailsDiv = document.querySelector<HTMLDivElement>("#app > div");
@@ -23,18 +28,9 @@ export async function displayWeather() {
 
   const mapButton = document.createElement("div");
   mapButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-  mapButton.innerHTML = `
-      <svg
-        stroke="currentColor"
-        fill="currentColor"
-        stroke-width="0"
-        viewBox="0 0 576 512"
-        height="20px"
-        width="20px"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M0 117.66v346.32c0 11.32 11.43 19.06 21.94 14.86L160 416V32L20.12 87.95A32.006 32.006 0 0 0 0 117.66zM192 416l192 64V96L192 32v384zM554.06 33.16L416 96v384l139.88-55.95A31.996 31.996 0 0 0 576 394.34V48.02c0-11.32-11.43-19.06-21.94-14.86z"></path>
-      </svg>`;
+  mapButton.innerHTML = getSvgOtherIcon(
+    `<path d="M0 117.66v346.32c0 11.32 11.43 19.06 21.94 14.86L160 416V32L20.12 87.95A32.006 32.006 0 0 0 0 117.66zM192 416l192 64V96L192 32v384zM554.06 33.16L416 96v384l139.88-55.95A31.996 31.996 0 0 0 576 394.34V48.02c0-11.32-11.43-19.06-21.94-14.86z"></path>`
+  );
   mapButton.addEventListener("click", () => {
     map();
   });
@@ -43,45 +39,7 @@ export async function displayWeather() {
   homeDiv?.append(headerDiv);
 
   for (const city of cities) {
-    const cityDiv = document.createElement("div");
-
-    const weatherData = await fetchCityWeather(city);
-
-    cityDiv.className = `flex bg-${
-      WEATHER_CODES[weatherData.current.weather_code]
-    } w-10/12 justify-between rounded-md p-5 items-center`;
-
-    const cityTitle = document.createElement("h3");
-    cityTitle.className = "w-fit";
-    cityTitle.innerText = city.name;
-    cityDiv.append(cityTitle);
-
-    const weatherDiv = document.createElement("div");
-    weatherDiv.className = "flex w-fit gap-4 items-center";
-
-    const weatherIcon = document.createElement("div");
-    weatherIcon.innerHTML = `  <svg
-      stroke="currentColor"
-      fill="currentColor"
-      stroke-width="0"
-      viewBox="0 0 24 24"
-      height="40px"
-      width="40px"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-        ${WEATHER_ICONS[weatherData.current.weather_code]}
-    </svg>`;
-
-    const temperature = document.createElement("h2");
-    temperature.innerText = `${weatherData.current.temperature_2m.toFixed(0)}°`;
-
-    weatherDiv.append(weatherIcon);
-    weatherDiv.append(temperature);
-    cityDiv.append(weatherDiv);
-
-    cityDiv.addEventListener("click", () =>
-      displayWeatherDetail(city, weatherData)
-    );
+    const cityDiv = await createLocationDiv(city);
     homeDiv.append(cityDiv);
   }
 
@@ -95,48 +53,8 @@ export async function displayWeather() {
     homeDiv?.append(recentTitle);
 
     recentlyViewed.forEach(async (city: City) => {
-      const cityDiv = document.createElement("div");
-
-      const weatherData = await fetchCityWeather(city);
-
-      cityDiv.className = `flex bg-${
-        WEATHER_CODES[weatherData.current.weather_code]
-      } w-10/12 justify-between rounded-md p-5 items-center`;
-
-      const cityTitle = document.createElement("h3");
-      cityTitle.className = "w-fit";
-      cityTitle.innerText = city.name;
-      cityDiv.append(cityTitle);
-
-      const weatherDiv = document.createElement("div");
-      weatherDiv.className = "flex w-fit gap-4 items-center";
-
-      const weatherIcon = document.createElement("div");
-      weatherIcon.innerHTML = `  <svg
-      stroke="currentColor"
-      fill="currentColor"
-      stroke-width="0"
-      viewBox="0 0 24 24"
-      height="40px"
-      width="40px"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-        ${WEATHER_ICONS[weatherData.current.weather_code]}
-    </svg>`;
-
-      const temperature = document.createElement("h2");
-      temperature.innerText = `${weatherData.current.temperature_2m.toFixed(
-        0
-      )}°`;
-
-      weatherDiv.append(weatherIcon);
-      weatherDiv.append(temperature);
-      cityDiv.append(weatherDiv);
-
-      cityDiv.addEventListener("click", () =>
-        displayWeatherDetail(city, weatherData)
-      );
-      homeDiv.append(cityDiv);
+      const locationDiv = await createLocationDiv(city);
+      homeDiv.append(locationDiv);
     });
   }
   appDiv?.append(homeDiv);
@@ -205,20 +123,9 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
     const weatherIconDiv = document.createElement("div");
     weatherIconDiv.className = "place-self-center";
-    console.log(WEATHER_ICONS[weatherDetail.daily.weather_code[i]]);
-    weatherIconDiv.innerHTML = `
-        <svg
-          stroke="currentColor"
-          fill="currentColor"
-          stroke-width="0"
-          viewBox="0 0 24 24"
-          height="40px"
-          width="40px"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          
-           ${WEATHER_ICONS[weatherDetail.daily.weather_code[i]]}
-        </svg>`;
+    weatherIconDiv.innerHTML = getSvgWeatherIcon(
+      WEATHER_ICONS[weatherDetail.daily.weather_code[i]]
+    );
     dayDiv.append(weatherIconDiv);
 
     const tempMin = document.createElement("div");
@@ -239,18 +146,9 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
   const backButton = document.createElement("div");
   backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-  backButton.innerHTML = `
-      <svg
-        stroke="currentColor"
-        fill="currentColor"
-        stroke-width="0"
-        viewBox="0 0 576 512"
-        height="20px"
-        width="20px"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>
-      </svg>`;
+  backButton.innerHTML = getSvgOtherIcon(
+    ` <path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>`
+  );
   backButton.addEventListener("click", () => {
     displayWeather();
   });
@@ -282,18 +180,9 @@ export function map() {
 
   const backButton = document.createElement("div");
   backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-  backButton.innerHTML = `
-      <svg
-        stroke="currentColor"
-        fill="currentColor"
-        stroke-width="0"
-        viewBox="0 0 576 512"
-        height="20px"
-        width="20px"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>
-      </svg>`;
+  backButton.innerHTML = getSvgOtherIcon(
+    ` <path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>`
+  );
   backButton.addEventListener("click", () => {
     displayWeather();
   });
