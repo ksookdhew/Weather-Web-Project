@@ -1,6 +1,16 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts}"],
+  purge: {
+    content: ["./index.html", "./src/**/*.{js,ts}"],
+    safelist: [
+      "bg-background",
+      "bg-sunny",
+      "bg-cloudy",
+      "bg-rainy",
+      "bg-snowy",
+      "bg-thunderstorm",
+    ],
+  },
   theme: {
     extend: {
       colors: {
