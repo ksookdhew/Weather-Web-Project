@@ -11,10 +11,10 @@ export async function displayWeather() {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
   const homeDiv = document.createElement("div");
   homeDiv.id = "home";
-  homeDiv.className = "flex flex-col gap-4 w-full items-center text-white";
+  homeDiv.className = "flex flex-col gap-4 w-full items-center text-white pb-8";
 
   const pageTitle = document.createElement("h1");
-  pageTitle.className = "text-white text-4xl p-8 self-start";
+  pageTitle.className = "text-white text-4xl px-8 pt-8 self-start";
   pageTitle.innerText = "Weather";
   homeDiv?.append(pageTitle);
 
@@ -85,6 +85,60 @@ export async function displayWeather() {
     homeDiv.append(cityDiv);
   }
 
+  const recentlyViewed = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+  if (recentlyViewed.length > 0) {
+    const recentTitle = document.createElement("h2");
+    recentTitle.className = "text-white text-xl px-8 pt-4 self-start";
+    recentTitle.innerText = "Recently Viewed";
+    homeDiv?.append(recentTitle);
+
+    recentlyViewed.forEach(async (city: City) => {
+      const cityDiv = document.createElement("div");
+
+      const weatherData = await fetchCityWeather(city);
+
+      cityDiv.className = `flex bg-${
+        WEATHER_CODES[weatherData.current.weather_code]
+      } w-10/12 justify-between rounded-md p-5 items-center`;
+
+      const cityTitle = document.createElement("h3");
+      cityTitle.className = "w-fit";
+      cityTitle.innerText = city.name;
+      cityDiv.append(cityTitle);
+
+      const weatherDiv = document.createElement("div");
+      weatherDiv.className = "flex w-fit gap-4 items-center";
+
+      const weatherIcon = document.createElement("div");
+      weatherIcon.innerHTML = `  <svg
+      stroke="currentColor"
+      fill="currentColor"
+      stroke-width="0"
+      viewBox="0 0 24 24"
+      height="40px"
+      width="40px"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+        ${WEATHER_ICONS[weatherData.current.weather_code]}
+    </svg>`;
+
+      const temperature = document.createElement("h2");
+      temperature.innerText = `${weatherData.current.temperature_2m.toFixed(
+        0
+      )}°`;
+
+      weatherDiv.append(weatherIcon);
+      weatherDiv.append(temperature);
+      cityDiv.append(weatherDiv);
+
+      cityDiv.addEventListener("click", () =>
+        displayWeatherDetail(city, weatherData)
+      );
+      homeDiv.append(cityDiv);
+    });
+  }
   appDiv?.append(homeDiv);
 }
 
@@ -258,10 +312,17 @@ export function map() {
   map.on("click", async (e) => {
     const { lat, lng } = e.latlng;
     const city: City = {
-      name: `${lat}°, ${lng}°`,
+      name: `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`,
       latitude: lat,
       longitude: lng,
     };
+
+    let recentlyViewed: City[] = JSON.parse(
+      sessionStorage.getItem("recentlyViewed") || "[]"
+    );
+    recentlyViewed.unshift(city);
+    sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+
     if (city) {
       const weatherData = await fetchCityWeather(city);
       displayWeatherDetail(city, weatherData);
