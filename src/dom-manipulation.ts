@@ -146,7 +146,7 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
   todayDiv.className = "text-white text-center w-full self-center p-5 h-2/5";
   todayDiv.setAttribute(
     "style",
-    `background: url("/src/images/${
+    `background: url("public/images/${
       WEATHER_IMAGES[today.current.weather_code]
     }") no-repeat center center/cover;`
   );
