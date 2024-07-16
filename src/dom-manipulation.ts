@@ -1,7 +1,7 @@
 import L from "leaflet";
-import { fetchCity7DayForecast, fetchCityWeather } from "./api.ts";
+import { fetchCity7DayForecast, fetchCityWeather, geocodeCity } from "./api.ts";
 import { WEATHER_CODES, WEATHER_ICONS, WEATHER_IMAGES } from "./constants.ts";
-import { City, WeatherResponse } from "./interfaces.ts";
+import { City, GeocodeResponse, WeatherResponse } from "./interfaces.ts";
 import {
   cities,
   createLocationDiv,
@@ -24,7 +24,33 @@ export async function displaySkeleton() {
   homeDiv?.append(pageTitle);
 
   const headerDiv = document.createElement("div");
-  headerDiv.className = "flex justify-end w-10/12";
+  headerDiv.className = "flex justify-between w-10/12 items-center mb-4 gap-1";
+
+  const searchDiv = document.createElement("div");
+  searchDiv.className = "flex justify-start w-10/12 items-center gap-2";
+  const searchInput = document.createElement("input");
+  searchInput.type = "text";
+  searchInput.placeholder = "Search city...";
+  searchInput.className =
+    "flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-black";
+  searchInput.addEventListener("keypress", async (e) => {
+    if (e.key === "Enter") {
+      await handleSearch();
+    }
+  });
+  searchDiv.append(searchInput);
+
+  const searchButton = document.createElement("div");
+  searchButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+  searchButton.innerHTML = getSvgOtherIcon(
+    `<path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>`
+  );
+  searchButton.addEventListener("click", async () => {
+    await handleSearch();
+  });
+
+  searchDiv.append(searchButton);
+  headerDiv.append(searchDiv);
 
   const mapButton = document.createElement("div");
   mapButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
@@ -48,6 +74,30 @@ export async function displaySkeleton() {
   }
   homeDiv.append(cityPlaceholderDiv);
   appDiv?.append(homeDiv);
+  async function handleSearch() {
+    const cityName = searchInput.value.trim();
+    if (cityName) {
+      const cityData: GeocodeResponse = await geocodeCity(cityName);
+      const city: City = {
+        name: cityData.results[0].name,
+        latitude: +cityData.results[0].latitude,
+        longitude: +cityData.results[0].longitude,
+      };
+
+      let recentlyViewed: City[] = JSON.parse(
+        sessionStorage.getItem("recentlyViewed") || "[]"
+      );
+      recentlyViewed.unshift(city);
+      sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+
+      if (city) {
+        const weatherData = await fetchCityWeather(city);
+        displayWeatherDetail(city, weatherData);
+      } else {
+        console.error(`City '${cityName}' not found`);
+      }
+    }
+  }
 }
 
 export async function displayWeather() {

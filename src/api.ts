@@ -1,4 +1,9 @@
-import { City, DailyWeatherResponse, WeatherResponse } from "./interfaces.ts";
+import {
+  City,
+  DailyWeatherResponse,
+  GeocodeResponse,
+  WeatherResponse,
+} from "./interfaces.ts";
 
 export async function fetchCityWeather(city: City): Promise<WeatherResponse> {
   const response = await fetch(
@@ -16,4 +21,12 @@ export async function fetchCity7DayForecast(
   );
   const weatherData: DailyWeatherResponse = await response.json();
   return weatherData;
+}
+
+export async function geocodeCity(cityName: string): Promise<GeocodeResponse> {
+  const response = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}`
+  );
+  const geocodeData: GeocodeResponse = await response.json();
+  return geocodeData;
 }
