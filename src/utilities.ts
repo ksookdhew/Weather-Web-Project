@@ -15,9 +15,9 @@ export function getSvgWeatherIcon(path: string): string {
       stroke="currentColor"
       fill="currentColor"
       stroke-width="0"
-      viewBox="0 0 24 24"
-      height="40px"
-      width="40px"
+      viewBox="0 0 16 16"
+      height="30px"
+      width="30px"
       xmlns="http://www.w3.org/2000/svg"
       >
         ${path}
