@@ -150,101 +150,112 @@ export async function displayWeather() {
 export async function displayWeatherDetail(city: City, today: WeatherResponse) {
   const homeDiv = document.querySelector<HTMLDivElement>("#app div");
   homeDiv?.remove();
-
   const appDiv = document.querySelector<HTMLDivElement>("#app");
+
   const detailDiv = document.createElement("div");
   detailDiv.id = "detail";
-  detailDiv.className = `flex flex-col w-full items-center h-screen bg-${
-    WEATHER_CODES[today.current.weather_code]
-  }`;
+  detailDiv.className = "flex flex-col w-full items-center h-screen";
 
-  const weatherDetail = await fetchCity7DayForecast(city);
-
-  const todayDiv = document.createElement("div");
-  todayDiv.className = "text-white text-center w-full self-center p-5 h-2/5";
-  todayDiv.setAttribute(
-    "style",
-    `background: url("public/images/${
-      WEATHER_IMAGES[today.current.weather_code]
-    }") no-repeat center center/cover;`
-  );
-
-  const backButtonDiv = document.createElement("div");
-  backButtonDiv.className = "flex justify-start w-10/12";
-  const backButton = document.createElement("div");
-  backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-  backButton.innerHTML = getSvgOtherIcon(
-    ` <path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>`
-  );
-  backButton.addEventListener("click", () => {
-    displaySkeleton();
-    displayWeather();
-  });
-  backButtonDiv.append(backButton);
-  todayDiv.append(backButtonDiv);
-
-  const cityTitle = document.createElement("h3");
-  cityTitle.className = "text-2xl";
-  cityTitle.innerText = `${city.name}`;
-  todayDiv.append(cityTitle);
-
-  const tempElement = document.createElement("h2");
-  tempElement.className = "text-4xl";
-  tempElement.innerText = `${today.current.temperature_2m.toFixed(0)}°`;
-  todayDiv.append(tempElement);
-
-  const weatherDescription = document.createElement("h4");
-  weatherDescription.className = "text-xl";
-  weatherDescription.innerText = `${WEATHER_CODES[today.current.weather_code]}`;
-  todayDiv.append(weatherDescription);
-
-  const highLowTemps = document.createElement("h4");
-  highLowTemps.className = "text-lg";
-  highLowTemps.innerText = `H:${weatherDetail.daily.temperature_2m_max[0]}° L:${weatherDetail.daily.temperature_2m_min[0]}°`;
-  todayDiv.append(highLowTemps);
-
-  detailDiv.append(todayDiv);
-
-  const gridDiv = document.createElement("div");
-  gridDiv.className = `w-full grid grid-cols-4 gap-4 text-center text-white p-5 justify-center bg-${
-    WEATHER_CODES[today.current.weather_code]
-  }`;
-
-  for (let i = 0; i < weatherDetail.daily.time.length; i++) {
-    const dayDiv = document.createElement("div");
-    dayDiv.className = "contents";
-
-    const dayName = document.createElement("div");
-    dayName.className = "text-left";
-    dayName.innerText =
-      i === 0
-        ? "Today"
-        : new Date(weatherDetail.daily.time[i]).toLocaleDateString("en-US", {
-            weekday: "long",
-          });
-    dayDiv.append(dayName);
-
-    const weatherIconDiv = document.createElement("div");
-    weatherIconDiv.className = "place-self-center";
-    weatherIconDiv.innerHTML = getSvgWeatherIcon(
-      WEATHER_ICONS[weatherDetail.daily.weather_code[i]]
-    );
-    dayDiv.append(weatherIconDiv);
-
-    const tempMin = document.createElement("div");
-    tempMin.innerText = `${weatherDetail.daily.temperature_2m_min[i]}°`;
-    dayDiv.append(tempMin);
-
-    const tempMax = document.createElement("div");
-    tempMax.innerText = `${weatherDetail.daily.temperature_2m_max[i]}°`;
-    dayDiv.append(tempMax);
-
-    gridDiv.append(dayDiv);
-  }
-
-  detailDiv.append(gridDiv);
+  const loadingIndicator = document.createElement("h1");
+  loadingIndicator.className =
+    "flex items-center justify-center w-full h-full loader text-white text-4xl";
+  loadingIndicator.innerText = `loading...`;
+  detailDiv?.append(loadingIndicator);
 
   appDiv?.append(detailDiv);
+  try {
+    const weatherDetail = await fetchCity7DayForecast(city);
+    loadingIndicator.remove();
+
+    const todayDiv = document.createElement("div");
+    todayDiv.className = "text-white text-center w-full self-center p-5 h-2/5";
+    todayDiv.setAttribute(
+      "style",
+      `background: url("public/images/${
+        WEATHER_IMAGES[today.current.weather_code]
+      }") no-repeat center center/cover;`
+    );
+
+    const backButtonDiv = document.createElement("div");
+    backButtonDiv.className = "flex justify-start w-10/12";
+    const backButton = document.createElement("div");
+    backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+    backButton.innerHTML = getSvgOtherIcon(
+      `<path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>`
+    );
+    backButton.addEventListener("click", () => {
+      displaySkeleton();
+      displayWeather();
+    });
+    backButtonDiv.append(backButton);
+    todayDiv.append(backButtonDiv);
+
+    const cityTitle = document.createElement("h3");
+    cityTitle.className = "text-2xl";
+    cityTitle.innerText = `${city.name}`;
+    todayDiv.append(cityTitle);
+
+    const tempElement = document.createElement("h2");
+    tempElement.className = "text-4xl";
+    tempElement.innerText = `${today.current.temperature_2m.toFixed(0)}°`;
+    todayDiv.append(tempElement);
+
+    const weatherDescription = document.createElement("h4");
+    weatherDescription.className = "text-xl";
+    weatherDescription.innerText = `${
+      WEATHER_CODES[today.current.weather_code]
+    }`;
+    todayDiv.append(weatherDescription);
+
+    const highLowTemps = document.createElement("h4");
+    highLowTemps.className = "text-lg";
+    highLowTemps.innerText = `H:${weatherDetail.daily.temperature_2m_max[0]}° L:${weatherDetail.daily.temperature_2m_min[0]}°`;
+    todayDiv.append(highLowTemps);
+
+    detailDiv.append(todayDiv);
+
+    const gridDiv = document.createElement("div");
+    gridDiv.className = `w-full grid grid-cols-4 gap-4 text-center text-white p-5 justify-center bg-${
+      WEATHER_CODES[today.current.weather_code]
+    }`;
+
+    for (let i = 0; i < weatherDetail.daily.time.length; i++) {
+      const dayDiv = document.createElement("div");
+      dayDiv.className = "contents";
+
+      const dayName = document.createElement("div");
+      dayName.className = "text-left";
+      dayName.innerText =
+        i === 0
+          ? "Today"
+          : new Date(weatherDetail.daily.time[i]).toLocaleDateString("en-US", {
+              weekday: "long",
+            });
+      dayDiv.append(dayName);
+
+      const weatherIconDiv = document.createElement("div");
+      weatherIconDiv.className = "place-self-center";
+      weatherIconDiv.innerHTML = getSvgWeatherIcon(
+        WEATHER_ICONS[weatherDetail.daily.weather_code[i]]
+      );
+      dayDiv.append(weatherIconDiv);
+
+      const tempMin = document.createElement("div");
+      tempMin.innerText = `${weatherDetail.daily.temperature_2m_min[i]}°`;
+      dayDiv.append(tempMin);
+
+      const tempMax = document.createElement("div");
+      tempMax.innerText = `${weatherDetail.daily.temperature_2m_max[i]}°`;
+      dayDiv.append(tempMax);
+
+      gridDiv.append(dayDiv);
+    }
+
+    detailDiv.append(gridDiv);
+  } catch (error) {
+    console.error("Error fetching weather data:", error);
+    loadingIndicator.innerText = "Failed to load data. Please try again.";
+  }
 }
 
 export function map() {
