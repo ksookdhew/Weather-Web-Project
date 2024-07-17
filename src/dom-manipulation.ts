@@ -154,7 +154,9 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
   const detailDiv = document.createElement("div");
   detailDiv.id = "detail";
-  detailDiv.className = "flex flex-col w-full items-center h-screen";
+  detailDiv.className = `flex flex-col w-full items-center h-screen bg-${
+    WEATHER_CODES[today.current.weather_code]
+  }`;
 
   const loadingIndicator = document.createElement("h1");
   loadingIndicator.className =
@@ -264,10 +266,11 @@ export function map() {
   homeDiv?.remove();
 
   const outerMapDiv = document.createElement("div");
+  outerMapDiv.className = "h-screen px-5";
 
   const backButtonDiv = document.createElement("div");
   backButtonDiv.className =
-    "flex justify-start w-8/12 gap-1 items-center px-5 text-white";
+    "flex justify-start w-8/12 gap-1 items-center text-white";
   const backButton = document.createElement("div");
   backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
   backButton.innerHTML = getSvgOtherIcon(
@@ -288,12 +291,12 @@ export function map() {
 
   const mapDiv = document.createElement("div");
   mapDiv.id = "mapid";
-  mapDiv.style.height = "600px";
+  mapDiv.className = "h-2/3 rounded-lg";
   outerMapDiv?.appendChild(mapDiv);
 
   appDiv?.append(outerMapDiv);
 
-  const map = L.map("mapid").setView([-26.2, 28.03], 13);
+  const map = L.map("mapid").setView([-26.2, 28.03], 12);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
