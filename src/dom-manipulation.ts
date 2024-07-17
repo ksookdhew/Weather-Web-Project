@@ -138,7 +138,9 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
   const detailDiv = document.createElement("div");
   detailDiv.id = "detail";
-  detailDiv.className = "flex flex-col w-full items-center h-screen";
+  detailDiv.className = `flex flex-col w-full items-center h-screen bg-${
+    WEATHER_CODES[today.current.weather_code]
+  }`;
 
   const weatherDetail = await fetchCity7DayForecast(city);
 

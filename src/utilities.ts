@@ -47,7 +47,7 @@ export async function createLocationDiv(city: City): Promise<HTMLDivElement> {
     WEATHER_CODES[weatherData.current.weather_code]
   } w-10/12 justify-between rounded-md p-5 items-center`;
 
-  const cityTitle = document.createElement("h3");
+  const cityTitle = document.createElement("h2");
   cityTitle.className = "w-fit";
   cityTitle.innerText = city.name;
   cityDiv.append(cityTitle);
