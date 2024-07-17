@@ -13,10 +13,10 @@ export async function displaySkeleton() {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
   const detailsDiv = document.querySelector<HTMLDivElement>("#app > div");
   detailsDiv?.remove();
-
   const homeDiv = document.createElement("div");
   homeDiv.id = "home";
-  homeDiv.className = "flex flex-col gap-4 w-full items-center text-white pb-8";
+  homeDiv.className =
+    "flex flex-col gap-4 w-full items-center text-white pb-8 max-w-screen-md";
 
   const pageTitle = document.createElement("h1");
   pageTitle.className = "text-white text-4xl px-8 pt-8 self-start";
@@ -74,6 +74,7 @@ export async function displaySkeleton() {
   }
   homeDiv.append(cityPlaceholderDiv);
   appDiv?.append(homeDiv);
+
   async function handleSearch() {
     const cityName = searchInput.value.trim();
     if (cityName) {
@@ -262,11 +263,11 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
 export function map() {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
-  const homeDiv = document.querySelector<HTMLDivElement>("#app > #home");
+  const homeDiv = document.querySelector<HTMLDivElement>("#app > div");
   homeDiv?.remove();
 
   const outerMapDiv = document.createElement("div");
-  outerMapDiv.className = "h-screen px-5";
+  outerMapDiv.className = "h-screen px-5 w-full";
 
   const backButtonDiv = document.createElement("div");
   backButtonDiv.className =
