@@ -19,7 +19,7 @@ export default {
         cloudy: "#90a5af",
         rainy: "#56565C",
         snowy: "##ccc9bb",
-        thunderstorm: "56565C",
+        thunderstorm: "#3c3d40",
       },
     },
   },
