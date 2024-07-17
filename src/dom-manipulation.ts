@@ -87,8 +87,20 @@ export async function displaySkeleton() {
       let recentlyViewed: City[] = JSON.parse(
         sessionStorage.getItem("recentlyViewed") || "[]"
       );
-      recentlyViewed.unshift(city);
-      sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+
+      const cityExists = recentlyViewed.some(
+        (viewedCity) =>
+          viewedCity.latitude === city.latitude &&
+          viewedCity.longitude === city.longitude
+      );
+
+      if (!cityExists) {
+        recentlyViewed.unshift(city);
+        sessionStorage.setItem(
+          "recentlyViewed",
+          JSON.stringify(recentlyViewed)
+        );
+      }
 
       if (city) {
         const weatherData = await fetchCityWeather(city);
@@ -114,13 +126,17 @@ export async function displayWeather() {
     const recentlyViewed = JSON.parse(
       sessionStorage.getItem("recentlyViewed") || "[]"
     );
+
     if (recentlyViewed.length > 0) {
       const recentTitle = document.createElement("h2");
       recentTitle.className = "text-white text-xl px-8 pt-4 self-start";
       recentTitle.innerText = "Recently Viewed";
       homeDiv?.append(recentTitle);
+
+      const limitedRecentlyViewed = recentlyViewed.slice(0, 5);
+
       const recentData = await Promise.all(
-        recentlyViewed.map(async (city: City) => {
+        limitedRecentlyViewed.map(async (city: City) => {
           return await createLocationDiv(city);
         })
       );
@@ -283,8 +299,17 @@ export function map() {
     let recentlyViewed: City[] = JSON.parse(
       sessionStorage.getItem("recentlyViewed") || "[]"
     );
-    recentlyViewed.unshift(city);
-    sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+
+    const cityExists = recentlyViewed.some(
+      (viewedCity) =>
+        viewedCity.latitude === city.latitude &&
+        viewedCity.longitude === city.longitude
+    );
+
+    if (!cityExists) {
+      recentlyViewed.unshift(city);
+      sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+    }
 
     if (city) {
       const weatherData = await fetchCityWeather(city);
