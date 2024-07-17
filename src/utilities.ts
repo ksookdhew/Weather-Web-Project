@@ -15,9 +15,9 @@ export function getSvgWeatherIcon(path: string): string {
       stroke="currentColor"
       fill="currentColor"
       stroke-width="0"
-      viewBox="0 0 24 24"
-      height="40px"
-      width="40px"
+      viewBox="0 0 16 16"
+      height="30px"
+      width="30px"
       xmlns="http://www.w3.org/2000/svg"
       >
         ${path}
@@ -47,7 +47,7 @@ export async function createLocationDiv(city: City): Promise<HTMLDivElement> {
     WEATHER_CODES[weatherData.current.weather_code]
   } w-10/12 justify-between rounded-md p-5 items-center`;
 
-  const cityTitle = document.createElement("h3");
+  const cityTitle = document.createElement("h2");
   cityTitle.className = "w-fit";
   cityTitle.innerText = city.name;
   cityDiv.append(cityTitle);
