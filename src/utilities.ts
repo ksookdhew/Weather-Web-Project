@@ -1,6 +1,10 @@
 import { fetchCityWeather } from "./api.ts";
-import { WEATHER_CODES, WEATHER_ICONS } from "./constants.ts";
-import { displayWeatherDetail } from "./dom-manipulation.ts";
+import { WEATHER_CODES, WEATHER_ICONS, iconPaths } from "./constants.ts";
+import {
+  displaySkeleton,
+  displayWeather,
+  displayWeatherDetail,
+} from "./dom-manipulation.ts";
 import { City } from "./interfaces.ts";
 
 export const cities: City[] = [
@@ -10,26 +14,14 @@ export const cities: City[] = [
   { name: "London", latitude: 51.51, longitude: -0.12 },
 ];
 
-export function getSvgWeatherIcon(path: string): string {
-  return `<svg
-      stroke="currentColor"
-      fill="currentColor"
-      stroke-width="0"
-      viewBox="0 0 16 16"
-      height="30px"
-      width="30px"
-      xmlns="http://www.w3.org/2000/svg"
-      >
-        ${path}
-     </svg>`;
-}
-
-export function getSvgOtherIcon(path: string): string {
+export function getSvgIcon(path: string, isWeatherIcon: boolean): string {
+  let viewbox: string;
+  isWeatherIcon ? (viewbox = "0 0 16 16") : (viewbox = "0 0 576 512");
   return ` <svg
         stroke="currentColor"
         fill="currentColor"
         stroke-width="0"
-        viewBox="0 0 576 512"
+        viewBox="${viewbox}"
         height="20px"
         width="20px"
         xmlns="http://www.w3.org/2000/svg"
@@ -56,8 +48,9 @@ export async function createLocationDiv(city: City): Promise<HTMLDivElement> {
   weatherDiv.className = "flex w-fit gap-4 items-center";
 
   const weatherIcon = document.createElement("div");
-  weatherIcon.innerHTML = getSvgWeatherIcon(
-    WEATHER_ICONS[weatherData.current.weather_code]
+  weatherIcon.innerHTML = getSvgIcon(
+    WEATHER_ICONS[weatherData.current.weather_code],
+    true
   );
 
   const temperature = document.createElement("h2");
@@ -71,4 +64,56 @@ export async function createLocationDiv(city: City): Promise<HTMLDivElement> {
     displayWeatherDetail(city, weatherData)
   );
   return cityDiv;
+}
+
+export function addRecentlyViewedCity(city: City) {
+  let recentlyViewed: City[] = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+
+  const cityExists = recentlyViewed.some(
+    (viewedCity) =>
+      viewedCity.latitude === city.latitude &&
+      viewedCity.longitude === city.longitude
+  );
+
+  if (!cityExists) {
+    recentlyViewed.unshift(city);
+    sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+  }
+}
+
+export async function displayRecentlyViewedCities(homeDiv: HTMLElement | null) {
+  const recentlyViewed: City[] = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+
+  if (recentlyViewed.length > 0) {
+    const recentTitle = document.createElement("h2");
+    recentTitle.className = "text-white text-xl px-8 pt-4 self-start";
+    recentTitle.innerText = "Recently Viewed";
+    homeDiv?.append(recentTitle);
+
+    const limitedRecentlyViewed = recentlyViewed.slice(0, 5);
+    const recentData = await Promise.all(
+      limitedRecentlyViewed.map(async (city) => await createLocationDiv(city))
+    );
+    recentData.forEach((locationDiv) => homeDiv?.append(locationDiv));
+  }
+}
+
+export function createBackButtonDiv() {
+  const div = document.createElement("div");
+  div.className = "flex justify-start w-8/12 gap-1 items-center text-white";
+
+  const backButton = document.createElement("div");
+  backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+  backButton.innerHTML = getSvgIcon(`${iconPaths["back"]}`, false);
+  backButton.addEventListener("click", () => {
+    displaySkeleton();
+    displayWeather();
+  });
+
+  div.append(backButton);
+  return div;
 }
