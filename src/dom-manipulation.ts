@@ -4,17 +4,11 @@ import {
   WEATHER_CODES,
   WEATHER_ICONS,
   WEATHER_IMAGES,
+  cities,
   iconPaths,
 } from "./constants.ts";
-import { City, GeocodeResponse, WeatherResponse } from "./interfaces.ts";
-import {
-  addRecentlyViewedCity,
-  cities,
-  createBackButtonDiv,
-  createLocationDiv,
-  displayRecentlyViewedCities,
-  getSvgIcon,
-} from "./utilities.ts";
+import { City, WeatherResponse } from "./interfaces.ts";
+import { extractCityData, getSvgIcon } from "./utilities.ts";
 
 export async function displaySkeleton() {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
@@ -119,14 +113,6 @@ export async function displaySkeleton() {
     }
     return div;
   }
-
-  function extractCityData(cityData: GeocodeResponse): City {
-    return {
-      name: cityData.results[0].name,
-      latitude: +cityData.results[0].latitude,
-      longitude: +cityData.results[0].longitude,
-    };
-  }
 }
 
 export async function displayWeather() {
@@ -134,7 +120,7 @@ export async function displayWeather() {
 
   try {
     const citiesData = await Promise.all(
-      cities.map((city) => createLocationDiv(city))
+      Object.values(cities).map((city) => createLocationDiv(city))
     );
     const cityPlaceholder = document.querySelector("#cityPlaceholder");
     cityPlaceholder?.remove();
@@ -228,7 +214,9 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
     const highLowTemps = document.createElement("h4");
     highLowTemps.className = "text-lg";
-    highLowTemps.innerText = `H:${weatherDetail.daily.temperature_2m_max[0]}° L:${weatherDetail.daily.temperature_2m_min[0]}°`;
+    highLowTemps.innerText = `H:${
+      weatherDetail.daily.temperature_2m_max?.[0] ?? "UNK"
+    }° L:${weatherDetail.daily.temperature_2m_min[0]}°`;
     div.append(highLowTemps);
 
     return div;
@@ -316,7 +304,10 @@ export function map() {
   }
 
   function initializeMap() {
-    const map = L.map("mapid").setView([-26.2, 28.03], 12);
+    const map = L.map("mapid").setView(
+      [cities["johannesburg"].latitude, cities["johannesburg"].longitude],
+      12
+    );
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -332,4 +323,92 @@ export function map() {
       longitude: lng,
     };
   }
+}
+
+async function createLocationDiv(city: City): Promise<HTMLDivElement> {
+  const cityDiv = document.createElement("div");
+
+  const weatherData = await fetchCityWeather(city);
+
+  cityDiv.className = `flex bg-${
+    WEATHER_CODES[weatherData.current.weather_code]
+  } w-10/12 justify-between rounded-md p-5 items-center`;
+
+  const cityTitle = document.createElement("h2");
+  cityTitle.className = "w-fit";
+  cityTitle.innerText = city.name;
+  cityDiv.append(cityTitle);
+
+  const weatherDiv = document.createElement("div");
+  weatherDiv.className = "flex w-fit gap-4 items-center";
+
+  const weatherIcon = document.createElement("div");
+  weatherIcon.innerHTML = getSvgIcon(
+    WEATHER_ICONS[weatherData.current.weather_code],
+    true
+  );
+
+  const temperature = document.createElement("h2");
+  temperature.innerText = `${weatherData.current.temperature_2m.toFixed(0)}°`;
+
+  weatherDiv.append(weatherIcon);
+  weatherDiv.append(temperature);
+  cityDiv.append(weatherDiv);
+
+  cityDiv.addEventListener("click", () =>
+    displayWeatherDetail(city, weatherData)
+  );
+  return cityDiv;
+}
+
+function addRecentlyViewedCity(city: City) {
+  let recentlyViewed: City[] = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+
+  const cityExists = recentlyViewed.some(
+    (viewedCity) =>
+      viewedCity.latitude === city.latitude &&
+      viewedCity.longitude === city.longitude
+  );
+
+  if (!cityExists) {
+    recentlyViewed.unshift(city);
+    sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+  }
+}
+
+async function displayRecentlyViewedCities(homeDiv: HTMLElement | null) {
+  const recentlyViewed: City[] = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+
+  if (recentlyViewed.length > 0) {
+    const recentTitle = document.createElement("h2");
+    recentTitle.className = "text-white text-xl px-8 pt-4 self-start";
+    recentTitle.innerText = "Recently Viewed";
+    homeDiv?.append(recentTitle);
+
+    const limitedRecentlyViewed = recentlyViewed.slice(0, 5);
+    const recentData = await Promise.all(
+      limitedRecentlyViewed.map(async (city) => await createLocationDiv(city))
+    );
+    recentData.forEach((locationDiv) => homeDiv?.append(locationDiv));
+  }
+}
+
+function createBackButtonDiv() {
+  const div = document.createElement("div");
+  div.className = "flex justify-start w-8/12 gap-1 items-center text-white";
+
+  const backButton = document.createElement("div");
+  backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+  backButton.innerHTML = getSvgIcon(`${iconPaths["back"]}`, false);
+  backButton.addEventListener("click", () => {
+    displaySkeleton();
+    displayWeather();
+  });
+
+  div.append(backButton);
+  return div;
 }
