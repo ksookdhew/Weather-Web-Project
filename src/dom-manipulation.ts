@@ -7,7 +7,7 @@ import {
   cities,
   iconPaths,
 } from "./constants.ts";
-import { City, WeatherResponse } from "./interfaces.ts";
+import { City, DailyWeatherResponse, WeatherResponse } from "./interfaces.ts";
 import { extractCityData, getSvgIcon } from "./utilities.ts";
 
 export async function displaySkeleton() {
@@ -167,7 +167,7 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
     detailDiv: HTMLElement,
     city: City,
     today: WeatherResponse,
-    weatherDetail: any
+    weatherDetail: DailyWeatherResponse
   ) {
     detailDiv.innerHTML = "";
 
@@ -181,7 +181,7 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
   function createTodayDiv(
     city: City,
     today: WeatherResponse,
-    weatherDetail: any
+    weatherDetail: DailyWeatherResponse
   ) {
     const div = document.createElement("div");
     div.className = "text-white text-center w-full self-center p-5 h-2/5";
@@ -215,14 +215,17 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
     const highLowTemps = document.createElement("h4");
     highLowTemps.className = "text-lg";
     highLowTemps.innerText = `H:${
-      weatherDetail.daily.temperature_2m_max?.[0] ?? "UNK"
-    }° L:${weatherDetail.daily.temperature_2m_min[0]}°`;
+      weatherDetail.daily.temperature_2m_max?.[0] ?? "Unknown"
+    }° L:${weatherDetail.daily.temperature_2m_min?.[0] ?? "Unknown"}°`;
     div.append(highLowTemps);
 
     return div;
   }
 
-  function createGridDiv(weatherDetail: any, today: WeatherResponse) {
+  function createGridDiv(
+    weatherDetail: DailyWeatherResponse,
+    today: WeatherResponse
+  ) {
     const div = document.createElement("div");
     div.className = `w-full grid grid-cols-4 gap-4 text-center text-white p-5 justify-center bg-${
       WEATHER_CODES[today.current.weather_code]
@@ -237,25 +240,32 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
       dayName.innerText =
         i === 0
           ? "Today"
-          : new Date(weatherDetail.daily.time[i]).toLocaleDateString("en-US", {
-              weekday: "long",
-            });
+          : new Date(weatherDetail.daily.time?.[i]).toLocaleDateString(
+              "en-US",
+              {
+                weekday: "long",
+              }
+            ) ?? "Unknown";
       dayDiv.append(dayName);
 
       const weatherIconDiv = document.createElement("div");
       weatherIconDiv.className = "place-self-center";
       weatherIconDiv.innerHTML = getSvgIcon(
-        WEATHER_ICONS[weatherDetail.daily.weather_code[i]],
+        WEATHER_ICONS[weatherDetail.daily.weather_code?.[i] ?? 0],
         true
       );
       dayDiv.append(weatherIconDiv);
 
       const tempMin = document.createElement("div");
-      tempMin.innerText = `${weatherDetail.daily.temperature_2m_min[i]}°`;
+      tempMin.innerText = `${
+        weatherDetail.daily.temperature_2m_min?.[i] ?? "Unknown"
+      }°`;
       dayDiv.append(tempMin);
 
       const tempMax = document.createElement("div");
-      tempMax.innerText = `${weatherDetail.daily.temperature_2m_max[i]}°`;
+      tempMax.innerText = `${
+        weatherDetail.daily.temperature_2m_max?.[i] ?? "Unknown"
+      }°`;
       dayDiv.append(tempMax);
 
       div.append(dayDiv);
