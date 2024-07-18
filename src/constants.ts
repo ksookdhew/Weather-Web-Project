@@ -1,3 +1,5 @@
+import { City } from "./interfaces";
+
 export const WEATHER_CODES: { [code: number]: string } = {
   0: "sunny",
   1: "cloudy",
@@ -8,7 +10,7 @@ export const WEATHER_CODES: { [code: number]: string } = {
   51: "drizzle",
   53: "drizzle",
   55: "drizzle",
-  56: "drizze",
+  56: "drizzle",
   57: "drizzle",
   61: "rainy",
   63: "rainy",
@@ -101,4 +103,11 @@ export const WEATHER_IMAGES: { [code: number]: string } = {
   95: "rainy.png",
   96: "rainy.png",
   99: "rainy.png",
+};
+
+export const cities: { [code: string]: City } = {
+  newYork: { name: "New York", latitude: 40.71, longitude: -74.01 },
+  paris: { name: "Paris", latitude: 48.85, longitude: 2.35 },
+  johannesburg: { name: "Johannesburg", latitude: -26.2, longitude: 28.03 },
+  london: { name: "London", latitude: 51.51, longitude: -0.12 },
 };
