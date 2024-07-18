@@ -13,8 +13,7 @@ import {
   createBackButtonDiv,
   createLocationDiv,
   displayRecentlyViewedCities,
-  getSvgOtherIcon,
-  getSvgWeatherIcon,
+  getSvgIcon,
 } from "./utilities.ts";
 
 export async function displaySkeleton() {
@@ -88,7 +87,7 @@ export async function displaySkeleton() {
   function createSearchButton(searchHandler: () => void) {
     const button = document.createElement("div");
     button.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-    button.innerHTML = getSvgOtherIcon(`${iconPaths["search"]}`);
+    button.innerHTML = getSvgIcon(`${iconPaths["search"]}`, false);
     button.addEventListener("click", async () => {
       await searchHandler();
     });
@@ -98,7 +97,7 @@ export async function displaySkeleton() {
   function createMapButton() {
     const button = document.createElement("div");
     button.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-    button.innerHTML = getSvgOtherIcon(`${iconPaths["map"]}`);
+    button.innerHTML = getSvgIcon(`${iconPaths["map"]}`, false);
     button.addEventListener("click", () => {
       map();
     });
@@ -257,8 +256,9 @@ export async function displayWeatherDetail(city: City, today: WeatherResponse) {
 
       const weatherIconDiv = document.createElement("div");
       weatherIconDiv.className = "place-self-center";
-      weatherIconDiv.innerHTML = getSvgWeatherIcon(
-        WEATHER_ICONS[weatherDetail.daily.weather_code[i]]
+      weatherIconDiv.innerHTML = getSvgIcon(
+        WEATHER_ICONS[weatherDetail.daily.weather_code[i]],
+        true
       );
       dayDiv.append(weatherIconDiv);
 

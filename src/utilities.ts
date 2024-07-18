@@ -1,5 +1,5 @@
 import { fetchCityWeather } from "./api.ts";
-import { WEATHER_CODES, WEATHER_ICONS } from "./constants.ts";
+import { WEATHER_CODES, WEATHER_ICONS, iconPaths } from "./constants.ts";
 import {
   displaySkeleton,
   displayWeather,
@@ -14,26 +14,14 @@ export const cities: City[] = [
   { name: "London", latitude: 51.51, longitude: -0.12 },
 ];
 
-export function getSvgWeatherIcon(path: string): string {
-  return `<svg
-      stroke="currentColor"
-      fill="currentColor"
-      stroke-width="0"
-      viewBox="0 0 16 16"
-      height="30px"
-      width="30px"
-      xmlns="http://www.w3.org/2000/svg"
-      >
-        ${path}
-     </svg>`;
-}
-
-export function getSvgOtherIcon(path: string): string {
+export function getSvgIcon(path: string, isWeatherIcon: boolean): string {
+  let viewbox: string;
+  isWeatherIcon ? (viewbox = "0 0 16 16") : (viewbox = "0 0 576 512");
   return ` <svg
         stroke="currentColor"
         fill="currentColor"
         stroke-width="0"
-        viewBox="0 0 576 512"
+        viewBox="${viewbox}"
         height="20px"
         width="20px"
         xmlns="http://www.w3.org/2000/svg"
@@ -60,8 +48,9 @@ export async function createLocationDiv(city: City): Promise<HTMLDivElement> {
   weatherDiv.className = "flex w-fit gap-4 items-center";
 
   const weatherIcon = document.createElement("div");
-  weatherIcon.innerHTML = getSvgWeatherIcon(
-    WEATHER_ICONS[weatherData.current.weather_code]
+  weatherIcon.innerHTML = getSvgIcon(
+    WEATHER_ICONS[weatherData.current.weather_code],
+    true
   );
 
   const temperature = document.createElement("h2");
@@ -119,9 +108,7 @@ export function createBackButtonDiv() {
 
   const backButton = document.createElement("div");
   backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
-  backButton.innerHTML = getSvgOtherIcon(
-    `<path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>`
-  );
+  backButton.innerHTML = getSvgIcon(`${iconPaths["back"]}`, false);
   backButton.addEventListener("click", () => {
     displaySkeleton();
     displayWeather();
