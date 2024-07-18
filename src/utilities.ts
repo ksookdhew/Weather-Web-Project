@@ -1,6 +1,10 @@
 import { fetchCityWeather } from "./api.ts";
 import { WEATHER_CODES, WEATHER_ICONS } from "./constants.ts";
-import { displayWeatherDetail } from "./dom-manipulation.ts";
+import {
+  displaySkeleton,
+  displayWeather,
+  displayWeatherDetail,
+} from "./dom-manipulation.ts";
 import { City } from "./interfaces.ts";
 
 export const cities: City[] = [
@@ -71,4 +75,58 @@ export async function createLocationDiv(city: City): Promise<HTMLDivElement> {
     displayWeatherDetail(city, weatherData)
   );
   return cityDiv;
+}
+
+export function addRecentlyViewedCity(city: City) {
+  let recentlyViewed: City[] = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+
+  const cityExists = recentlyViewed.some(
+    (viewedCity) =>
+      viewedCity.latitude === city.latitude &&
+      viewedCity.longitude === city.longitude
+  );
+
+  if (!cityExists) {
+    recentlyViewed.unshift(city);
+    sessionStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+  }
+}
+
+export async function displayRecentlyViewedCities(homeDiv: HTMLElement | null) {
+  const recentlyViewed: City[] = JSON.parse(
+    sessionStorage.getItem("recentlyViewed") || "[]"
+  );
+
+  if (recentlyViewed.length > 0) {
+    const recentTitle = document.createElement("h2");
+    recentTitle.className = "text-white text-xl px-8 pt-4 self-start";
+    recentTitle.innerText = "Recently Viewed";
+    homeDiv?.append(recentTitle);
+
+    const limitedRecentlyViewed = recentlyViewed.slice(0, 5);
+    const recentData = await Promise.all(
+      limitedRecentlyViewed.map(async (city) => await createLocationDiv(city))
+    );
+    recentData.forEach((locationDiv) => homeDiv?.append(locationDiv));
+  }
+}
+
+export function createBackButtonDiv() {
+  const div = document.createElement("div");
+  div.className = "flex justify-start w-8/12 gap-1 items-center text-white";
+
+  const backButton = document.createElement("div");
+  backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
+  backButton.innerHTML = getSvgOtherIcon(
+    `<path d="M401.4 224h-214l83-79.4c11.9-12.5 11.9-32.7 0-45.2s-31.2-12.5-43.2 0L89 233.4c-6 5.8-9 13.7-9 22.4v.4c0 8.7 3 16.6 9 22.4l138.1 134c12 12.5 31.3 12.5 43.2 0 11.9-12.5 11.9-32.7 0-45.2l-83-79.4h214c16.9 0 30.6-14.3 30.6-32 .1-18-13.6-32-30.5-32z"></path>`
+  );
+  backButton.addEventListener("click", () => {
+    displaySkeleton();
+    displayWeather();
+  });
+
+  div.append(backButton);
+  return div;
 }
