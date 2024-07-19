@@ -39,7 +39,7 @@ export function createSearchInput(searchHandler: () => void) {
     "flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-black";
   input.addEventListener("keypress", async (e) => {
     if (e.key === "Enter") {
-      await searchHandler();
+      searchHandler();
     }
   });
   return input;
@@ -50,7 +50,7 @@ export function createSearchButton(searchHandler: () => void) {
   button.className = "flex justify-center bg-blue-500 p-3 rounded-full";
   button.innerHTML = getSvgIcon(`${iconPaths["search"]}`, false);
   button.addEventListener("click", async () => {
-    await searchHandler();
+    searchHandler();
   });
   return button;
 }
@@ -125,8 +125,12 @@ export function createBackButtonDiv() {
   const backButton = document.createElement("div");
   backButton.className = "flex justify-center bg-blue-500 p-3 rounded-full";
   backButton.innerHTML = getSvgIcon(`${iconPaths["back"]}`, false);
-  backButton.addEventListener("click", () => {
-    displaySkeleton();
+  backButton.addEventListener("click", async () => {
+    try {
+      await displaySkeleton();
+    } catch (error) {
+      console.error("Error displaying skeleton:", error);
+    }
   });
 
   div.append(backButton);

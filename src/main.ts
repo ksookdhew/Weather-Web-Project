@@ -17,7 +17,9 @@ import {
 import { City, WeatherResponse } from "./interfaces.ts";
 import { createCityFromLatLng, extractCityData } from "./utilities.ts";
 
-displaySkeleton();
+displaySkeleton().catch((error) =>
+  console.error("Error initializing the app:", error)
+);
 
 export async function displaySkeleton() {
   const appDiv = document.querySelector<HTMLDivElement>("#app");
@@ -37,7 +39,7 @@ export async function displaySkeleton() {
         addRecentlyViewedCity(city);
 
         const weatherData = await fetchCityWeather(city);
-        displayWeatherDetail(city, weatherData);
+        await displayWeatherDetail(city, weatherData);
       } catch (error) {
         console.error(`Error searching for city '${cityName}':`, error);
       }
@@ -52,7 +54,7 @@ export async function displaySkeleton() {
   homeDiv.append(headerDiv);
   homeDiv.append(createCityPlaceholderDiv());
 
-  displayWeather();
+  await displayWeather();
 }
 
 export async function displayWeather() {
@@ -114,7 +116,7 @@ export function map() {
     addRecentlyViewedCity(city);
 
     const weatherData = await fetchCityWeather(city);
-    displayWeatherDetail(city, weatherData);
+    await displayWeatherDetail(city, weatherData);
   });
 }
 
