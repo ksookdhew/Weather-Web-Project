@@ -23,3 +23,11 @@ export function extractCityData(cityData: GeocodeResponse): City {
     longitude: +cityData.results[0].longitude,
   };
 }
+
+export function createCityFromLatLng(lat: number, lng: number): City {
+  return {
+    name: `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`,
+    latitude: lat,
+    longitude: lng,
+  };
+}
