@@ -1,13 +1,13 @@
 import { City, GeocodeResponse } from "./interfaces.ts";
 
 export function getSvgIcon(path: string, isWeatherIcon: boolean): string {
-  let viewbox: string;
-  isWeatherIcon ? (viewbox = "0 0 16 16") : (viewbox = "0 0 576 512");
+  let viewBox: string;
+  isWeatherIcon ? (viewBox = "0 0 16 16") : (viewBox = "0 0 576 512");
   return ` <svg
         stroke="currentColor"
         fill="currentColor"
         stroke-width="0"
-        viewBox="${viewbox}"
+        viewBox="${viewBox}"
         height="20px"
         width="20px"
         xmlns="http://www.w3.org/2000/svg"

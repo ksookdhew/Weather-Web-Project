@@ -289,7 +289,7 @@ export function createMapDiv() {
   div.append(backButtonDiv);
 
   const mapDiv = document.createElement("div");
-  mapDiv.id = "mapid";
+  mapDiv.id = "mapId";
   mapDiv.className = "h-2/3 rounded-lg";
   div.appendChild(mapDiv);
 
@@ -297,7 +297,7 @@ export function createMapDiv() {
 }
 
 export function initializeMap() {
-  const map = L.map("mapid").setView(
+  const map = L.map("mapId").setView(
     [cities["johannesburg"].latitude, cities["johannesburg"].longitude],
     12
   );
